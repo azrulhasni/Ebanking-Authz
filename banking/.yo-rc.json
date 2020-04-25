@@ -1,0 +1,37 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.azrul.ebanking.banking"
+    },
+    "jhipsterVersion": "6.8.0",
+    "applicationType": "microservice",
+    "baseName": "banking",
+    "packageName": "com.azrul.ebanking.banking",
+    "packageFolder": "com/azrul/ebanking/banking",
+    "serverPort": "8081",
+    "authenticationType": "oauth2",
+    "cacheProvider": "no",
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": "eureka",
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "M2ZjZjI3Nzg2MWNlODA1NTIwMDZjOTcxNWI4NGI3OThlMGY4NTQxZGUwNjk1Mjc1MGM4ZWQ0MGQ0MTMyNGFjMjBjOTZkMjBlNGJhNmE3Nzc4NWZkN2Q2YzdmZWVkOTNlMTQxOWE4OTA0OGMwZDFjZGQ5YTBhZjYxMjNhNDU0MjQ=",
+    "embeddableLaunchScript": false,
+    "creationTimestamp": 1587652850528,
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": false,
+    "clientPackageManager": "npm",
+    "blueprints": [],
+    "skipClient": true,
+    "skipUserManagement": true
+  }
+}
