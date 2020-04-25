@@ -843,3 +843,191 @@ In the folder \$CONFIG_AUTHZ, add the file AuthzConfiguration.java containing:
 -   This enum represents the list of possible values of our authorisation scope
 
  
+
+### Running the gateway again
+
+-   Run the gateway again by firing your command line console and going to the
+    folder \$PROJECTS/ebanking/gateway
+
+-   Run:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> ./mvnw
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### Source code
+
+-   You can find the source code here:
+
+    -   \$SECURITY_AUTHZ:
+
+        <https://github.com/azrulhasni/Ebanking-Authz/tree/master/gateway/src/main/java/com/azrul/ebanking/gateway/security/authz>
+
+    -   \$CONFIG_AUTHZ:
+
+        <https://github.com/azrulhasni/Ebanking-Authz/tree/master/gateway/src/main/java/com/azrul/ebanking/gateway/config/authz>
+
+         
+
+Testing the authorisation scheme
+--------------------------------
+
+### Positive test case
+
+-   We will create a Product-Account. For the positive test case, we will use
+    the user minnie.mouse. The user is a bank teller and therefore should be
+    able to create an account
+
+-   To run the test, fire up your command line console and run the curl command
+    below. Make sure that
+
+    -   You populate `<password>` with the password assigned to the user
+        donald.duck
+
+    -   You populate `<client secret>` with ebankingclient secret as stated in
+        the paragraph 'Setting up Keycloak authorisation\>The steps'
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> curl -X POST \
+  http://localhost/auth/realms/ebanking/protocol/openid-connect/token \
+  -H 'Authorization: Basic Og==' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Postman-Token: 9a02d52c-a313-4f89-968d-3f4d59e8729d' \
+  -H 'cache-control: no-cache' \
+  -d 'username=minnie.mouse&password=<password>&client_id=ebankingclient&client_secret=<client secret>&grant_type=password&undefined='
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   You will get a long response. Copy the access token from the field
+    access_token.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{"access_token":"<access token>","expires_in":300,"refresh_expires_in":1800,"refresh_token":"<refresh token>","token_type":"bearer","not-before-policy":0,"session_state":"227267fe-b4ca-48e4-9048-d177315ab17e","scope":"profile email"}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   Once we have the access token, we can call our actual banking micro-service
+    through our Zuul gateway. Run another curl command below. Make sure that we
+    copy the access token from the curl result above and replace the `<access
+    token>` tag below:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+curl -X POST \
+  http://localhost:8080/services/banking/api/product-accounts \
+  -H 'Authorization: Bearer <access token>' \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: d13b081a-578d-4b9a-827b-f4b5a5d68808' \
+  -H 'cache-control: no-cache' \
+  -d '
+    {
+        "accountNumber": "1111111",
+        "productId": "222222",
+        "openingDate": "2020-04-23T11:40:40+08:00",
+        "status": 78700,
+        "balance": 43430,
+        "customerId": null
+    }
+'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   We will end up with the output below.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{"id":1061,"accountNumber":"1111111","productId":"222222","openingDate":"2020-04-23T03:40:40Z","status":78700,"balance":43430,"customerId":null}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### Negative test case
+
+-   In the negative test, we repeat the same thing with the user donald.duck
+    instead. This user is a bank customer so the request should fail
+
+-   To run the test, fire up your command line console and run the curl command
+    below. Make sure that
+
+    -   You populate `<password>` with the password assigned to the user
+        donald.duck
+
+    -   You populate `<client secret>` with ebankingclient secret as stated in
+        the paragraph 'Setting up Keycloak authorisation\>The steps'
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> curl -X POST \
+  http://localhost/auth/realms/ebanking/protocol/openid-connect/token \
+  -H 'Authorization: Basic Og==' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Postman-Token: 9a02d52c-a313-4f89-968d-3f4d59e8729d' \
+  -H 'cache-control: no-cache' \
+  -d 'username=donald.duck&password=<password>&client_id=ebankingclient&client_secret=<client secret>&grant_type=password&undefined='
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   You will get a long response. Copy the access token from the field
+    access_token.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{"access_token":"<access token>","expires_in":300,"refresh_expires_in":1800,"refresh_token":"<refresh token>","token_type":"bearer","not-before-policy":0,"session_state":"227267fe-b4ca-48e4-9048-d177315ab17e","scope":"profile email"}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   Once we have the access token, we can call our actual banking micro-service
+    through our Zuul gateway. Run another curl command below. Make sure that we
+    copy the access token from the curl result above and replace the `<access
+    token>` tag below. Notice that we have the `-vX` option on our curl command.
+    This will give us a more verbose output:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+curl -vX POST \
+  http://localhost:8080/services/banking/api/product-accounts \
+  -H 'Authorization: Bearer ' \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: 7d81252e-c4d2-46de-b2fe-ac4497e4931c' \
+  -H 'cache-control: no-cache' \
+  -d '
+    {
+        "accountNumber": "1111111",
+        "productId": "222222",
+        "openingDate": "2020-04-23T11:40:40+08:00",
+        "status": 78700,
+        "balance": 43430,
+        "customerId": null
+    }
+'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-   We will end up with the output below. Notice that we will get back the error
+    code 403 Forbidden.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> Content-Type: application/json
+> Postman-Token: 7d81252e-c4d2-46de-b2fe-ac4497e4931c
+> cache-control: no-cache
+> Content-Length: 210
+> 
+* upload completely sent off: 210 out of 210 bytes
+< HTTP/1.1 403 Forbidden
+< Expires: 0
+< Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+< Set-Cookie: XSRF-TOKEN=cbee3e99-cd67-40f2-8ef9-0856f242437d; path=/
+< X-XSS-Protection: 1; mode=block
+< Pragma: no-cache
+< X-Frame-Options: DENY
+< Referrer-Policy: strict-origin-when-cross-origin
+< Content-Security-Policy: default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:
+< Date: Sat, 25 Apr 2020 14:46:27 GMT
+< Connection: keep-alive
+< Vary: Origin
+< Vary: Access-Control-Request-Method
+< Vary: Access-Control-Request-Headers
+< X-Content-Type-Options: nosniff
+< Feature-Policy: geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'self'; payment 'none'
+< Content-Length: 0
+< 
+* Connection #0 to host localhost left intact
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+Load and performance
+--------------------
+
+ 
