@@ -72,20 +72,20 @@ Well, we could say that a customer should be able to read or view
 product-account - e.g. to know what is its balance. The bank teller should also
 be able to view a product-account - as customer could walk into a branch and
 query the bank teller for her balance. A bank teller could create a new
-product-account since a customer can come to the branch and register. But, a
-customer may not be able to create a product-account on his own. He would need
-to come to branch and get his ID card checked out etc. We definitely do not want
-some money launderer to open a bank account. (we call this step KYC - or Know
-Your Customer - it is a compliance check that exist in many countries, but many
-others may not have it). Let us summarise the mapping between roles, resource
-and rights of our application:
+product-account since a customer can come to the branch and register for one.
+But, a customer may not be able to create a product-account on his own. He would
+need to come to branch and get his ID card checked out etc. We definitely do not
+want some money launderer to open a bank account. (we call this step KYC - or
+Know Your Customer - it is a compliance check that exist in many countries, but
+many others may not have it). Let us summarise the mapping between roles,
+resource and rights of our application:
 
  
 
-| **Role**      | **Resource**    | **Rights**           |
-|---------------|-----------------|----------------------|
-| Bank Teller   | product-account | View, Create, Update |
-| Bank Customer | product-account | View, Update         |
+| **Role**      | **Resource**    | **Rights (also called Authorisation Scope)** |
+|---------------|-----------------|----------------------------------------------|
+| Bank Teller   | product-account | View, Create, Update                         |
+| Bank Customer | product-account | View, Update                                 |
 
 Now, here is a problem. When we say a bank customer can view product-account, he
 can actually view any product-account, even if the product-account is not his
@@ -107,8 +107,8 @@ View-Own. The problem is, determining product-account ownership is going beyond
 It actually make sense: the reason why we separate authorisation and business
 logic is so that the business logic could be used in some other authorisation
 context. But business rules, such as a customer can only see his own account,
-will stay true no matter what context it is. These business rules should reside
-with its corresponding service.
+will stay true no matter what the context it is. These business rules should
+reside with its corresponding service.
 
  
 
@@ -756,7 +756,7 @@ and evaluate if the call is authorised.
 ![](README.images/9o6Lbw.jpg)
 
 -   The folder \$CONFIG_AUTHZ will contain the configuration we will create
-    while  \$SECURITY_AUTHZ will contain our listeners.
+    while \$SECURITY_AUTHZ will contain our listeners.
 
  
 
@@ -789,14 +789,14 @@ In the folder \$CONFIG_AUTHZ, add the file AuthzConfiguration.java containing:
 
 -   This file is Spring annotated configuration file
 
--   (1) This is where we refer back to the application.yml file. We extract 4
+-   This is where we refer back to the application.yml file. We extract 4
     information OIDC client ID, OIDC client secret, issuer URI and
     authentication client pool size. The first three will help us connect with
     Keycloak and the last one will help us configure our object pool
 
--   (2) This is where we create the filter that does our authorisation
+-   This is where we create the filter that does our authorisation
 
--   (3) This where we initialise our object pool.
+-   This where we initialise our object pool.
 
  
 
@@ -816,23 +816,23 @@ In the folder \$CONFIG_AUTHZ, add the file AuthzConfiguration.java containing:
 
 ![](README.images/hFILNq.jpg)
 
--   (1) Get the access token using thr authorisation client. Note that we
-    ‘borrow’ the authorisation client from the object pool.
+-   Get the access token using thr authorisation client. Note that we ‘borrow’
+    the authorisation client from the object pool.
 
--   (2) Map HTTP method to Keycloak’s authorisation scope
+-   Map HTTP method to Keycloak’s authorisation scope
 
--   (3) From the URL in our request, we figure out the actual resource being
+-   From the URL in our request, we figure out the actual resource being
     requested
 
--   (4) We create a permission object (based on resource, scope and access
-    token) and query Keycloak. In
+-   We create a permission object (based on resource, scope and access token)
+    and query Keycloak. In
 
--   (5) We introspect the response. If we are denied the permission to access
-    the resource, this will throw an exception
+-   We introspect the response. If we are denied the permission to access the
+    resource, this will throw an exception
 
--   (6) If any exception is thrown, we will deny access
+-   If any exception is thrown, we will deny access
 
--   (7) Don’t forget to return back the authorization client we borrowed.
+-   Don’t forget to return back the authorization client we borrowed.
 
  
 
@@ -1027,7 +1027,52 @@ curl -vX POST \
 
  
 
-Load and performance
---------------------
+Central authorisation and load
+------------------------------
+
+-   One great advantage of micro-services is the ability to allow stateless
+    ’session management'. This is achieve through the usage of access token and
+    refresh token. Once an access token is obtain, a service can work
+    independently of a centralised authentication system (such as Keycloak)
+    until the token expires.
+
+-   This means that, distribution is easier and, as a consequences, scalability
+    is easier.
+
+-   What we are introducing here in this tutorial is to centralised
+    authorisation: for every request, we will validate if the request is
+    authorised to access a resource. This runs contrary to the stateless-ness of
+    micro-services session management.
+
+-   We would like to see if having a centralised authorisation would be
+    impactful to the load.
 
  
+
+Load testing
+
+-   We run Keycloak and our micro-services with production profile (to do this,
+    please follow the tutorial here
+    [<https://github.com/azrulhasni/Ebanking-JHipster-Keycloak-Nginx-K8>]) on a
+    laptop.
+
+-   Test parameters:
+
+    -   1000 threads doing requests for 1 hour
+
+    -   2 seconds think time between requests
+
+    -   100 authorisation clients in the object pool
+
+    -   Single instance of Keycloak, Zulu and Banking micro-service
+
+-   The result is as follows:
+
+![](README.images/CQ0s3O.jpg)
+
+-   We see that the response time is stable at around 6.5 seconds. Not fast but
+    respectable on a mere laptop with single node server for Keycloak and
+    micro-services
+
+-   What is more important is that the load seems stable and no error is
+    detected during tests

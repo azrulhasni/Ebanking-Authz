@@ -224,4 +224,4 @@ jhipster:
 ebanking:
   authz:
     client:
-       pool-size: 100
+       pool-size: 200

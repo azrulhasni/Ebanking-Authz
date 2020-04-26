@@ -1,0 +1,62 @@
+{
+  "" : {
+    "transaction" : "",
+    "sampleCount" : 412372,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 6647.529987487002,
+    "minResTime" : 18.0,
+    "maxResTime" : 10802.0,
+    "pct1ResTime" : 7219.0,
+    "pct2ResTime" : 7440.0,
+    "pct3ResTime" : 7991.950000000008,
+    "throughput" : 114.45830953249322,
+    "receivedKBytesPerSec" : 367.51847826448994,
+    "sentKBytesPerSec" : 181.41194958128563
+  },
+  "Get Jhipster data - Dev" : {
+    "transaction" : "Get Jhipster data - Dev",
+    "sampleCount" : 1000,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 3477.916000000002,
+    "minResTime" : 17.0,
+    "maxResTime" : 8858.0,
+    "pct1ResTime" : 7193.7,
+    "pct2ResTime" : 7413.549999999999,
+    "pct3ResTime" : 7869.96,
+    "throughput" : 14.985089835613564,
+    "receivedKBytesPerSec" : 48.116186894040425,
+    "sentKBytesPerSec" : 23.750782034375796
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 414372,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 6624.226576602572,
+    "minResTime" : 17.0,
+    "maxResTime" : 10802.0,
+    "pct1ResTime" : 7219.0,
+    "pct2ResTime" : 7440.0,
+    "pct3ResTime" : 7991.950000000008,
+    "throughput" : 114.87199390117125,
+    "receivedKBytesPerSec" : 368.6870668445492,
+    "sentKBytesPerSec" : 181.7346348932705
+  },
+  "Keycloak call to get token - Dev" : {
+    "transaction" : "Keycloak call to get token - Dev",
+    "sampleCount" : 1000,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 160.8629999999999,
+    "minResTime" : 70.0,
+    "maxResTime" : 417.0,
+    "pct1ResTime" : 223.0,
+    "pct2ResTime" : 243.94999999999993,
+    "pct3ResTime" : 300.97,
+    "throughput" : 16.690868425884197,
+    "receivedKBytesPerSec" : 43.97652637991755,
+    "sentKBytesPerSec" : 6.405772745480948
+  }
+}
