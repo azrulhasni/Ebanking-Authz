@@ -1076,3 +1076,21 @@ Load testing
 
 -   What is more important is that the load seems stable and no error is
     detected during tests
+
+-   The Jmeter test script can be found here
+    <https://github.com/azrulhasni/Ebanking-Authz/blob/master/AuthzTest.jmx>
+
+-   To run the Jmeter test script,
+
+    -   Download Jmeter and unzip it in \$PROJECTS/ebanking
+
+    -   Rename the folder to ‘jmeter'
+
+    -   Create a folder called report-N under  \$PROJECTS/ebanking. You can
+        customise N to be the test number you are doing
+
+    -   Run:
+
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    > ./jmeter/bin/jmeter -n -t ./AuthzTest.jmx -l ./myresult-N.csv -e -o ./report-N
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
