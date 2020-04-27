@@ -1,5 +1,7 @@
-Managing Keycloak authorisation through Zuul
-============================================
+Implementing authorisation using Keycloak through Zuul
+======================================================
+
+ 
 
 By Azrul MADISA
 
@@ -10,18 +12,17 @@ April 2020
 Introduction
 ------------
 
-Before micro-services, we tend to mix together different aspects of our software
-and systems. It is not uncommon to have a monolith component managing
-authentication, authorisation and business logic all in one place. This tight
-coupling would make it difficult for a particular business logic to be used
-‘outside’ of the corresponding authentication and authorisation scheme - and
-therefore makes it less reusable.
+We tend to mix together different aspects of our software and systems. It is not
+uncommon to have a system managing authentication, authorisation and business
+logic all in one place. This tight coupling would make it difficult for a
+particular business logic to be used ‘outside’ of the corresponding
+authentication and authorisation scheme - and therefore makes it less reusable.
 
-In the micro-services world, we would like to propose pushing authentication and
-authorisation to the Gateway layer. Basically, authorisation is checked even
+What we would like to propose is pushing authentication and authorisation to the
+Gateway layer. Basically, authentication and authorisation are checked even
 before a request hits a service. This means that, a service would be more
 ‘context-neutral’ when in comes to authentication and authorisation. It also
-means that I could easily deploy a service under a Gateway and manage its
+means that we could easily deploy a service under a Gateway and manage its
 authentication and authorisation separately at runtime. This would amplify
 reusability across the board.
 
@@ -47,12 +48,9 @@ you are allowed to edit certain data and delete certain others.
 
  
 
-In this tutorial we will mainly focus on Authorisation using Keycloak. We have
-already addressed Authentication as part of our earlier tutorial here
-[<https://github.com/azrulhasni/Ebanking-JHipster-Keycloak-Nginx-K8>]. We will
-also use that tutorial as the basis, i.e. we will not repeat some of the
-instructions that was already clarified before (e.g. how to deploy Keycloak to
-Kubernetes)
+In this tutorial we will mainly focus on authorisation using Keycloak. We have
+already addressed authentication as part of our earlier tutorial here
+[<https://github.com/azrulhasni/Ebanking-JHipster-Keycloak-Nginx-K8>].
 
  
 
@@ -87,13 +85,16 @@ resource and rights of our application:
 | Bank Teller   | product-account | View, Create, Update                         |
 | Bank Customer | product-account | View, Update                                 |
 
+ 
+
 Now, here is a problem. When we say a bank customer can view product-account, he
-can actually view any product-account, even if the product-account is not his
-own. The same thing with update. Of course that should not be true. A bank
+can actually view **any **product-account, even if the product-account is not
+his own. The same thing with update. Of course that should not be true. A bank
 customer should only be able to see and update her own account only. We might
 say that the solution is obvious: create two more rights, Update-Own or
 View-Own. The problem is, determining product-account ownership is going beyond
-‘authorisation’. This brings us to our rule of thumb.
+‘authorisation’ as we need the knowledge of the concept of account ownership,
+joint account etc.. This brings us to our rule of thumb.
 
  
 
@@ -168,9 +169,10 @@ Setting up Keycloak authorisation
 Here, we will talk about the concept of authorisation of Keycloak based on our
 implementation. Note that Keycloak has a very extensive and flexible
 authorisation framework - we will not cover the whole sleuth of that here. We
-will focus on how we are using it. For further reading please see [
+will focus on how we are using it. For further reading please see
+[<https://www.keycloak.org/docs/latest/authorization_services/>]
 
-<https://www.keycloak.org/docs/latest/authorization_services/>]
+ 
 
 Keycloak has the concept of a User having multiple Roles. (Roles can also be
 owned by multiple Users, but for simplicity sake, we will not focus on that).
@@ -186,7 +188,8 @@ represented in Keycloak.
 
  
 
-A scope represents actions to be done on a resource - such as read or create.
+An authorisation scope represents the rights of a user to take actions on a
+resource - such as read or create.
 
  
 
@@ -195,7 +198,7 @@ View and Update Product-Account” permission would tie the ROLE_CUSTOMER role
 (representing customer, through the CUSTOMER_POLICY) with a resource called
 /api/product-account and the scope is View.
 
-![](README.images/xW7o3e.jpg)
+![](README.images/SWSCR6.jpg)
 
 ### The steps
 
@@ -312,11 +315,9 @@ View and Update Product-Account” permission would tie the ROLE_CUSTOMER role
 
 ![](README.images/xhEcUa.jpg)
 
--    
-
-    -   Since the donald.duck’s role does not match the role in the 'Bank Teller
-        can Create View, and Update Product-Account’ permission, permission is
-        straight out denied.
+-   Since the donald.duck’s role does not match the role in the 'Bank Teller can
+    Create View, and Update Product-Account’ permission, permission is straight
+    out denied.
 
     -   The role donald.duck has matches the role in 'Customer can View and
         Update Product-Account’, the permission granted the scopes update and
@@ -828,7 +829,7 @@ In the folder \$CONFIG_AUTHZ, add the file AuthzConfiguration.java containing:
     and query Keycloak. In
 
 -   We introspect the response. If we are denied the permission to access the
-    resource, this will throw an exception
+    resource,  an exception will be thrown
 
 -   If any exception is thrown, we will deny access
 
@@ -1049,7 +1050,7 @@ Central authorisation and load
 
  
 
-Load testing
+### Load testing
 
 -   We run Keycloak and our micro-services with production profile (to do this,
     please follow the tutorial here
@@ -1070,7 +1071,7 @@ Load testing
 
 ![](README.images/CQ0s3O.jpg)
 
--   We see that the response time is stable at around 6.5 seconds. Not fast but
+-   We see that the response time is stable at around 6.5 seconds. Not fast, but
     respectable on a mere laptop with single node server for Keycloak and
     micro-services
 
@@ -1086,7 +1087,7 @@ Load testing
 
     -   Rename the folder to ‘jmeter'
 
-    -   Create a folder called report-N under  \$PROJECTS/ebanking. You can
+    -   Create a folder called report-N under \$PROJECTS/ebanking. You can
         customise N to be the test number you are doing
 
     -   Run:
