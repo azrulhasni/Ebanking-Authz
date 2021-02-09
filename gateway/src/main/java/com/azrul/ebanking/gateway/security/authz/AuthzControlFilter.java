@@ -137,7 +137,7 @@ public class AuthzControlFilter extends ZuulFilter {
         return now.isAfter(expiresAt.minus(Duration.ofMinutes(1L)));
     }
     
-    AuthzScope mapHttpMethodToScope(String httpMethod){
+    private AuthzScope mapHttpMethodToScope(String httpMethod){
         switch(httpMethod.toUpperCase()) 
         { 
             case "POST": 
